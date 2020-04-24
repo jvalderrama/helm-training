@@ -1,0 +1,5 @@
+replicas: 1
+# image:
+# podAnnotations:
+#   annotation1: value1
+# customVar: test

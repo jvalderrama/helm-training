@@ -1,0 +1,23 @@
+apiVersion: skaffold/v2beta2
+kind: Config
+build:
+  artifacts:
+    - image: localhost:32000/myapp
+      sync:
+        manual:
+        - src: "app.py"
+          dest: /usr/src/app
+
+deploy:
+  helm:
+    releases:
+      - name: local-myapp
+        chartPath: helm-chart
+        values:
+          image: localhost:32000/myapp
+
+portForward:
+- resourceType: deployment
+  resourceName: local-myapp-server
+  port: 5000
+  localPort: 5000

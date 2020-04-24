@@ -1,0 +1,35 @@
+{{- $deployName := printf "%s-%s" .Release.Name "server" -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $deployName }}
+  namespace: {{ .Release.Namespace}}
+spec:
+  selector:
+    matchLabels:
+      app: {{ $deployName }}
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ $deployName }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key | quote }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+    spec:
+      containers:
+      - name: myapp
+        image: {{ required "An image is required" .Values.image }}
+        ports:
+        - containerPort: 5000
+        env:
+          - name: foo
+            value: bar
+          {{- if .Values.customVar }}
+          - name: CUSTOM_VAR
+            value: {{ .Values.customVar}}
+          {{- end }}
