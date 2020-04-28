@@ -121,7 +121,8 @@ Note: Change Chart.yaml to version 1.0.4 and Python server app.py to version 1.0
 
 # Skaffold local k8s development
 
-Note: https://skaffold.dev/ (All environment are the same, keep the same at all)_
+Note: https://skaffold.dev/ (All environment are the same, keep the same at all)
+
 Explanation: Sync manual en skaffold.yaml to share  between local and kubernetes pod deployment directories and ports
 
 ```
@@ -138,8 +139,10 @@ helm history local-myapp
 kubectl get pods
 ```
 
-In your localhost go to http://localhost:5000/_
+In your localhost go to http://localhost:5000/
+
 Note: Change Python server app.py to version 1.0.7 and see in http://localhost:5000/ the changes automatically
+
 Control+c to exit from skaffold terminal log and go to http://127.0.0.1:8080/#/ns/default/apps to see that local-myapp is gone. Also verified:
 
 ```
