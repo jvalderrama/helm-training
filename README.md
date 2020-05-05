@@ -94,6 +94,7 @@ helm history app-mycompany (See rollback app-mycompany deployed with a new versi
 ```
 
 Note: Modificar el Chart.yaml en su version, para que se vea reflejado el tema de releases and Values.yaml para replicas
+
 Note: Modify "version" key on Chart.yaml to show the releases cycle and also modify "replicas" key for cluster k8s changes reflected in deployment
 
 ```
