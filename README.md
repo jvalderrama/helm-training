@@ -1,11 +1,15 @@
-# Helm - Training for Continuos Integration and Local Development with Skaffold
+# Helm3 - Training for Continuos Integration and Local Development with Skaffold
 
 ## Install microk8s and helm3 on local
 
+This training assume you already have some **kubernetes** knowledge, also **kubectl** command line client and **docker** command line client running and working on your localhost, it has been made for **Ubuntu/Debian** Operating Systems.
+
 ```
 sudo snap install microk8s --classic
-sudo micrko8s.start
+sudo microk8s.start
 microk8s.config > /tmp/kubeconfig
+sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
 export KUBECONFIG=/tmp/kubeconfig
 sudo snap install helm --classic
 helm repo add stable https://kubernetes-charts.storage.googleapis.com
@@ -21,6 +25,7 @@ helm upgrade --install nginx-mycompany stable/nginx-ingress --version 1.36.3
 helm list
 helm history nginx-mycompany
 helm rollback nginx-mycompany 1
+helm history nginx-mycompany
 ```
 
 ## Enable storage, registry and DNS service and allow port forward for volumes on microk8s local cluster
@@ -44,10 +49,11 @@ helm repo update
 kubectl get svc (Get chartmuseum endpoint)
 ```
 
-Ex: http://10.152.183.169:8080 and add this repo to your Helm
+Ex: http://10.152.183.169:8080 and add this repo to your Helm, check it firts in a Web Browser
 
 ```
 helm repo add chartmuseum-mycompany http://10.152.183.169:8080
+helm repo update
 ```
 
 ## Deploy KubeApps (UI) in our local microk8s cluster
@@ -65,7 +71,7 @@ kubectl create serviceaccount kubeapps-operator
 kubectl create clusterrolebinding kubeapps-operator --clusterrole=cluster-admin --serviceaccount=default:kubeapps-operator
 kubectl port-forward -n kubeapps svc/kubeapps-mycompany 8080:80
 ```
-In your localhost go to http://127.0.0.1:8080 and with the next command get the Token API to authenticate against kubeapps
+In your localhost go to http://localhost:8080 and with the next command get the Token API to authenticate against kubeapps
 
 ```
 kubectl get secret $(kubectl get serviceaccount kubeapps-operator -o jsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep kubeapps-operator-token) -o jsonpath='{.data.token}' -o go-template='{{.data.token | base64decode}}' && echo
@@ -80,8 +86,11 @@ docker run -p 5000:5000 --name example localhost:32000/myapp:latest
 http://localhost:5000
 docker push localhost:32000/myapp:latest
 helm install app-mycompany helm-chart --set image=localhost:32000/myapp:latest
+helm list (See app-mycompany deployed)
 helm upgrade app-mycompany helm-chart --set image=localhost:32000/myapp:latest --set customVar='MyCompany'
+helm history app-mycompany (See new app-mycompany deployed)
 helm rollback app-mycompany 1
+helm history app-mycompany (See rollback app-mycompany deployed with a new version -3-)
 ```
 
 Note: Modificar el Chart.yaml en su version, para que se vea reflejado el tema de releases and Values.yaml para replicas
@@ -103,11 +112,22 @@ helm plugin install https://github.com/chartmuseum/helm-push.git
 Note: Modify Chart.yaml to 1.0.3 version 
 
 ```
-./build.sh 1.0.3 (Note: Script to generate applications versions and store it)
+./build.sh 1.0.3
+```
+
+Note: The above Script generates application versions and store it in Helm3 package Chart into -chartmuseum-mycompany- repository)
+
+```
 helm repo update
 helm search repo app-example
 kubectl create ns develop
-./deploy.sh 1.0.3 develop hello_from_develop (Note: Deploy appplication in cluster and specific namespace once generate before with build.sh)
+./deploy.sh 1.0.3 develop hello_from_develop 
+helm list -n develop
+```
+
+Note: The above Script deploys appplication in an specific cluster and an specific namespace once generate before with build.sh script
+
+```
 kubectl get pods -n develop
 kubectl get svc -n develop
 ```
@@ -117,6 +137,7 @@ Note: Change Chart.yaml to version 1.0.4 and Python server app.py to version 1.0
 ```
 ./build.sh 1.0.4
 ./deploy.sh 1.0.4 develop hello_from_develop
+helm list -n develop
 ```
 
 # Skaffold local k8s development
